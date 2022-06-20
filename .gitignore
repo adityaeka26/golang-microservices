@@ -1,0 +1,2 @@
+volumes/mongodb/*
+!volumes/mongodb/init
