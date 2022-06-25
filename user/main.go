@@ -1,17 +1,14 @@
 package main
 
 import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
+	"github.com/adityaeka26/golang-microservices/user/app"
+	"github.com/adityaeka26/golang-microservices/user/module/query/handler"
 )
 
 func main() {
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong user",
-		})
-	})
-	r.Run(":8080")
+	_ = app.NewMongoDB("mongodb://root:leomessi@localhost:27017/book_db?authSource=admin&ssl=false")
+	handler := handler.NewHandler()
+	router := app.NewRouter(handler)
+
+	router.Run(":8080")
 }
