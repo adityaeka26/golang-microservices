@@ -5,3 +5,7 @@ type GetUserResponse struct {
 	Username string `json:"username"`
 	Name     string `json:"name"`
 }
+
+type CreateUserResponse struct {
+	Token string `json:"token"`
+}

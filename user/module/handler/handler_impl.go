@@ -10,12 +10,12 @@ import (
 )
 
 type HandlerImpl struct {
-	Service service.Service
+	service service.Service
 }
 
 func NewHandler(service service.Service) Handler {
 	return &HandlerImpl{
-		Service: service,
+		service: service,
 	}
 }
 
@@ -31,7 +31,7 @@ func (handler *HandlerImpl) GetUser(c *gin.Context) {
 		return
 	}
 
-	response, err := handler.Service.GetUser(c.Request.Context(), *request)
+	response, err := handler.service.GetUser(c.Request.Context(), *request)
 	if err != nil {
 		helper.RespError(c, err)
 		return
@@ -51,10 +51,10 @@ func (handler *HandlerImpl) CreateUser(c *gin.Context) {
 		return
 	}
 
-	err := handler.Service.CreateUser(c.Request.Context(), *request)
+	response, err := handler.service.CreateUser(c.Request.Context(), *request)
 	if err != nil {
 		helper.RespError(c, err)
 		return
 	}
-	helper.RespSuccess(c, nil, "Create user success")
+	helper.RespSuccess(c, response, "Create user success")
 }

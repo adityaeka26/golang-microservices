@@ -1,19 +1,23 @@
 package main
 
 import (
-	"github.com/adityaeka26/golang-microservices/user/app"
+	"github.com/adityaeka26/golang-microservices/user/config"
 	"github.com/adityaeka26/golang-microservices/user/database"
+	"github.com/adityaeka26/golang-microservices/user/jwt"
 	"github.com/adityaeka26/golang-microservices/user/module/handler"
 	"github.com/adityaeka26/golang-microservices/user/module/repository"
 	"github.com/adityaeka26/golang-microservices/user/module/service"
+	"github.com/adityaeka26/golang-microservices/user/router"
 )
 
 func main() {
-	mongoDatabase := database.NewMongoDB("mongodb://root:leomessi@localhost:27017/book_db?authSource=admin&ssl=false", "book_db")
+	config := config.NewConfig()
+	jwtAuth := jwt.NewJWT()
+	mongoDatabase := database.NewMongoDB(config.GetEnv().MongodbUrl, config.GetEnv().MongodbDatabaseName)
 	repository := repository.NewRepository(mongoDatabase)
-	service := service.NewService(repository)
+	service := service.NewService(repository, jwtAuth)
 	handler := handler.NewHandler(service)
-	router := app.NewRouter(handler)
+	router := router.NewRouter(handler)
 
-	router.Run(":8080")
+	router.GetGinEngine().Run(":8080")
 }

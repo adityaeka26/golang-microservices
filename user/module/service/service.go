@@ -7,6 +7,6 @@ import (
 )
 
 type Service interface {
-	CreateUser(ctx context.Context, request web.CreateUserRequest) error
+	CreateUser(ctx context.Context, request web.CreateUserRequest) (*web.CreateUserResponse, error)
 	GetUser(ctx context.Context, request web.GetUserRequest) (*web.GetUserResponse, error)
 }

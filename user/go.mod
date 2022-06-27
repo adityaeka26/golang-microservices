@@ -5,6 +5,8 @@ go 1.16
 require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-playground/validator/v10 v10.11.0
+	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect
+	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/pelletier/go-toml/v2 v2.0.2 // indirect
 	go.mongodb.org/mongo-driver v1.9.1

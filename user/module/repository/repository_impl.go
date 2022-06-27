@@ -8,17 +8,17 @@ import (
 )
 
 type RepositoryImpl struct {
-	MongoDatabase database.MongoDatabase
+	mongoDatabase database.MongoDatabase
 }
 
 func NewRepository(mongoDatabase database.MongoDatabase) Repository {
 	return &RepositoryImpl{
-		MongoDatabase: mongoDatabase,
+		mongoDatabase: mongoDatabase,
 	}
 }
 
 func (repository *RepositoryImpl) InsertOneUser(ctx context.Context, document interface{}) (*string, error) {
-	insertedId, err := repository.MongoDatabase.InsertOne(ctx, database.InsertOne{
+	insertedId, err := repository.mongoDatabase.InsertOne(ctx, database.InsertOne{
 		CollectionName: "user",
 		Document:       document,
 	})
@@ -31,7 +31,7 @@ func (repository *RepositoryImpl) InsertOneUser(ctx context.Context, document in
 
 func (repository *RepositoryImpl) FindOneUser(ctx context.Context, filter interface{}) (*domain.User, error) {
 	var result *domain.User
-	err := repository.MongoDatabase.FindOne(ctx, database.FindOne{
+	err := repository.mongoDatabase.FindOne(ctx, database.FindOne{
 		CollectionName: "user",
 		Filter:         filter,
 		Result:         &result,
