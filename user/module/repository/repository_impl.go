@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/adityaeka26/golang-microservices/user/database"
+	"github.com/adityaeka26/golang-microservices/user/module/model/domain"
 )
 
 type RepositoryImpl struct {
@@ -26,4 +27,18 @@ func (repository *RepositoryImpl) InsertOneUser(ctx context.Context, document in
 	}
 
 	return insertedId, nil
+}
+
+func (repository *RepositoryImpl) FindOneUser(ctx context.Context, filter interface{}) (*domain.User, error) {
+	var result *domain.User
+	err := repository.MongoDatabase.FindOne(ctx, database.FindOne{
+		CollectionName: "user",
+		Filter:         filter,
+		Result:         &result,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

@@ -20,7 +20,23 @@ func NewHandler(service service.Service) Handler {
 }
 
 func (handler *HandlerImpl) GetUser(c *gin.Context) {
-	c.String(http.StatusOK, "Hello")
+	request := &web.GetUserRequest{}
+
+	if err := c.ShouldBindQuery(request); err != nil {
+		helper.RespError(c, helper.CustomError(http.StatusBadRequest, err.Error()))
+		return
+	}
+	if err := helper.Validate(request); err != nil {
+		helper.RespError(c, helper.CustomError(http.StatusBadRequest, err.Error()))
+		return
+	}
+
+	response, err := handler.Service.GetUser(c.Request.Context(), *request)
+	if err != nil {
+		helper.RespError(c, err)
+		return
+	}
+	helper.RespSuccess(c, response, "Get user success")
 }
 
 func (handler *HandlerImpl) CreateUser(c *gin.Context) {
@@ -35,7 +51,8 @@ func (handler *HandlerImpl) CreateUser(c *gin.Context) {
 		return
 	}
 
-	if err := handler.Service.CreateUser(c.Request.Context(), *request); err != nil {
+	err := handler.Service.CreateUser(c.Request.Context(), *request)
+	if err != nil {
 		helper.RespError(c, err)
 		return
 	}

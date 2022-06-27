@@ -48,3 +48,27 @@ func (mongoDatabase MongoDatabaseImpl) InsertOne(ctx context.Context, payload In
 	insertedId := insertDoc.InsertedID.(primitive.ObjectID).Hex()
 	return &insertedId, nil
 }
+
+type FindOne struct {
+	CollectionName string
+	Filter         interface{}
+	Result         interface{}
+}
+
+func (mongoDatabase MongoDatabaseImpl) FindOne(ctx context.Context, payload FindOne) error {
+	collection := mongoDatabase.MongoClient.Database(mongoDatabase.DatabaseName).Collection(payload.CollectionName)
+	result := collection.FindOne(ctx, payload.Filter)
+
+	if result.Err() != nil {
+		if result.Err() == mongo.ErrNoDocuments {
+			return nil
+		}
+		return helper.CustomError(http.StatusInternalServerError, fmt.Sprintf("Error Mongodb Connection: %s", result.Err().Error()))
+	}
+
+	if err := result.Decode(payload.Result); err != nil {
+		return helper.CustomError(http.StatusInternalServerError, fmt.Sprintf("Error Mongodb Connection: %s", "Cannot unmarshal result"))
+	}
+
+	return nil
+}

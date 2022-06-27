@@ -8,7 +8,7 @@ import (
 func NewRouter(handler handler.Handler) *gin.Engine {
 	router := gin.New()
 
-	// router.GET("/test", handler.GetUser)
+	router.GET("/user", handler.GetUser)
 	router.POST("/user", handler.CreateUser)
 
 	return router
