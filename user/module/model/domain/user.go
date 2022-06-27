@@ -1,8 +1,11 @@
 package domain
 
+type InsertUser struct {
+	Username string `bson:"username"`
+	Password string `bson:"password"`
+	Name     string `bson:"name"`
+}
 type User struct {
-	Id       string
-	Username string
-	Password string
-	Name     string
+	Id *string `bson:"_id"`
+	*InsertUser
 }

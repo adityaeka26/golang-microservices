@@ -25,12 +25,13 @@ func (handler *HandlerImpl) GetUser(c *gin.Context) {
 
 func (handler *HandlerImpl) CreateUser(c *gin.Context) {
 	request := &web.CreateUserRequest{}
-	if err := c.Bind(request); err != nil {
-		helper.RespError(c, helper.CustomError(http.StatusBadRequest, "bad request"))
+
+	if err := c.ShouldBind(request); err != nil {
+		helper.RespError(c, helper.CustomError(http.StatusBadRequest, err.Error()))
 		return
 	}
 	if err := helper.Validate(request); err != nil {
-		helper.RespError(c, err)
+		helper.RespError(c, helper.CustomError(http.StatusBadRequest, err.Error()))
 		return
 	}
 
@@ -38,6 +39,5 @@ func (handler *HandlerImpl) CreateUser(c *gin.Context) {
 		helper.RespError(c, err)
 		return
 	}
-
 	helper.RespSuccess(c, nil, "Create user success")
 }

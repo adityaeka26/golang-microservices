@@ -1,3 +1,9 @@
 package repository
 
-type Repository interface{}
+import (
+	"context"
+)
+
+type Repository interface {
+	InsertOneUser(ctx context.Context, document interface{}) (*string, error)
+}
