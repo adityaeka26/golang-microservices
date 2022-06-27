@@ -1,3 +1,2 @@
-volumes/mongodb/*
 .vscode/*
 */.env
