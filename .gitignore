@@ -1,4 +1,2 @@
-volumes/mongodb/*
-!volumes/mongodb/init
 .vscode/*
 */.env
