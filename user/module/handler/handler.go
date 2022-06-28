@@ -3,6 +3,6 @@ package handler
 import "github.com/gin-gonic/gin"
 
 type Handler interface {
-	GetUser(c *gin.Context)
-	CreateUser(c *gin.Context)
+	Register(c *gin.Context)
+	VerifyRegister(c *gin.Context)
 }

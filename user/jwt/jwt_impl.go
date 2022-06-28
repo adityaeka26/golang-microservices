@@ -1,17 +1,18 @@
 package jwt
 
 import (
-	"net/http"
-
+	"github.com/adityaeka26/golang-microservices/user/config"
 	"github.com/golang-jwt/jwt/v4"
 )
 
 type JWTImpl struct {
-	request *http.Request
+	config config.Config
 }
 
-func NewJWT() JWT {
-	return JWTImpl{}
+func NewJWT(config config.Config) JWT {
+	return JWTImpl{
+		config: config,
+	}
 }
 
 type Payload struct {
@@ -23,7 +24,7 @@ func (jwtAuth JWTImpl) GenerateToken(payload Payload) (*string, error) {
 		"id": payload.Id,
 	})
 
-	tokenString, err := token.SignedString([]byte("keytest"))
+	tokenString, err := token.SignedString([]byte(jwtAuth.config.GetEnv().JwtKey))
 	if err != nil {
 		return nil, err
 	}

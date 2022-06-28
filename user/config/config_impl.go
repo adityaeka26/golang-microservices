@@ -20,6 +20,7 @@ func NewConfig() Config {
 		env: Env{
 			MongodbUrl:          os.Getenv("MONGODB_URL"),
 			MongodbDatabaseName: os.Getenv("MONGODB_DATABASENAME"),
+			JwtKey:              os.Getenv("JWT_KEY"),
 		},
 	}
 }
@@ -27,6 +28,7 @@ func NewConfig() Config {
 type Env struct {
 	MongodbUrl          string
 	MongodbDatabaseName string
+	JwtKey              string
 }
 
 func (config ConfigImpl) GetEnv() Env {

@@ -8,18 +8,18 @@ import (
 )
 
 type RepositoryImpl struct {
-	mongoDatabase database.MongoDatabase
+	mongo database.MongoDatabase
 }
 
-func NewRepository(mongoDatabase database.MongoDatabase) Repository {
+func NewRepository(mongo database.MongoDatabase) Repository {
 	return &RepositoryImpl{
-		mongoDatabase: mongoDatabase,
+		mongo: mongo,
 	}
 }
 
 func (repository *RepositoryImpl) InsertOneUser(ctx context.Context, document interface{}) (*string, error) {
-	insertedId, err := repository.mongoDatabase.InsertOne(ctx, database.InsertOne{
-		CollectionName: "user",
+	insertedId, err := repository.mongo.InsertOne(ctx, database.InsertOne{
+		CollectionName: "users",
 		Document:       document,
 	})
 	if err != nil {
@@ -31,8 +31,8 @@ func (repository *RepositoryImpl) InsertOneUser(ctx context.Context, document in
 
 func (repository *RepositoryImpl) FindOneUser(ctx context.Context, filter interface{}) (*domain.User, error) {
 	var result *domain.User
-	err := repository.mongoDatabase.FindOne(ctx, database.FindOne{
-		CollectionName: "user",
+	err := repository.mongo.FindOne(ctx, database.FindOne{
+		CollectionName: "users",
 		Filter:         filter,
 		Result:         &result,
 	})
