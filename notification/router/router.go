@@ -16,7 +16,7 @@ type RouterImpl struct {
 func NewRouter(handler handler.Handler) Router {
 	router := gin.New()
 
-	_ = router.Group("/notification")
+	go handler.SendRegisterOtp()
 
 	return &RouterImpl{
 		ginEngine: router,

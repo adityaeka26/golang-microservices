@@ -23,7 +23,7 @@ func NewHandler(service service.Service) Handler {
 	}
 }
 
-func (handler *HandlerImpl) Register(c *gin.Context) {
+func (handler HandlerImpl) Register(c *gin.Context) {
 	request := &web.RegisterRequest{}
 
 	if err := c.ShouldBind(request); err != nil {
@@ -43,7 +43,7 @@ func (handler *HandlerImpl) Register(c *gin.Context) {
 	helper.RespSuccess(c, nil, "Register success")
 }
 
-func (handler *HandlerImpl) VerifyRegister(c *gin.Context) {
+func (handler HandlerImpl) VerifyRegister(c *gin.Context) {
 	request := &web.VerifyRegisterRequest{}
 
 	if err := c.ShouldBind(request); err != nil {

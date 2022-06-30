@@ -11,7 +11,7 @@ type KafkaProducer interface {
 }
 
 type KafkaProducerImpl struct {
-	Producer sarama.SyncProducer
+	producer sarama.SyncProducer
 }
 
 func NewKafkaProducer() KafkaProducer {
@@ -26,7 +26,7 @@ func NewKafkaProducer() KafkaProducer {
 	}
 
 	return &KafkaProducerImpl{
-		Producer: producers,
+		producer: producers,
 	}
 }
 
@@ -36,7 +36,7 @@ func (kafkaProducer KafkaProducerImpl) SendMessage(topic string, msg string) err
 		Value: sarama.StringEncoder(msg),
 	}
 
-	_, _, err := kafkaProducer.Producer.SendMessage(kafkaMsg)
+	_, _, err := kafkaProducer.producer.SendMessage(kafkaMsg)
 	if err != nil {
 		return err
 	}

@@ -55,7 +55,7 @@ func (service ServiceImpl) Register(ctx context.Context, request web.RegisterReq
 		"username": request.Username,
 	})
 	if err != nil {
-		return helper.CustomError(http.StatusInternalServerError, err.Error())
+		return helper.CustomError(http.StatusInternalServerError, fmt.Sprintf("Find one user fail: %s", err.Error()))
 	}
 	if user != nil {
 		return helper.CustomError(http.StatusUnprocessableEntity, "Username already registered")
@@ -66,7 +66,7 @@ func (service ServiceImpl) Register(ctx context.Context, request web.RegisterReq
 		"mobileNumber": request.MobileNumber,
 	})
 	if err != nil {
-		return helper.CustomError(http.StatusInternalServerError, err.Error())
+		return helper.CustomError(http.StatusInternalServerError, fmt.Sprintf("Find one user 2 fail: %s", err.Error()))
 	}
 	if user != nil {
 		return helper.CustomError(http.StatusUnprocessableEntity, "Mobile number already registered")
@@ -75,12 +75,14 @@ func (service ServiceImpl) Register(ctx context.Context, request web.RegisterReq
 	// Generate hashed password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return helper.CustomError(http.StatusInternalServerError, err.Error())
+		fmt.Printf("Generate hashed password fail: %s", err.Error())
+		return helper.CustomError(http.StatusInternalServerError)
 	}
 
 	// Generate otp 6 digit
 	otp, err := helper.GenerateOTP(6)
 	if err != nil {
+		fmt.Printf("Generate otp fail: %s", err.Error())
 		return helper.CustomError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -94,6 +96,7 @@ func (service ServiceImpl) Register(ctx context.Context, request web.RegisterReq
 	}
 	userRedisJson, err := json.Marshal(userRedis)
 	if err != nil {
+		fmt.Printf("Generate otp fail: %s", err.Error())
 		return helper.CustomError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -104,24 +107,24 @@ func (service ServiceImpl) Register(ctx context.Context, request web.RegisterReq
 		string(userRedisJson),
 		time.Minute*10,
 	).Err(); err != nil {
-		return helper.CustomError(http.StatusInternalServerError, err.Error())
+		return helper.CustomError(http.StatusInternalServerError, fmt.Sprintf("Find one user fail: %s", err.Error()))
 	}
 
 	// Generate user json for kafka
-	userKafka := domain.UserKafka{
+	userKafka := domain.RegisterOtpKafka{
 		Name:         request.Name,
 		Otp:          *otp,
 		MobileNumber: request.MobileNumber,
 	}
 	userKafkaJson, err := json.Marshal(userKafka)
 	if err != nil {
-		return helper.CustomError(http.StatusInternalServerError, err.Error())
+		return helper.CustomError(http.StatusInternalServerError, fmt.Sprintf("Find one user fail: %s", err.Error()))
 	}
 
 	// Produce user json to kafka
 	err = service.kafkaProducer.SendMessage("REGISTER-OTP", string(userKafkaJson))
 	if err != nil {
-		return helper.CustomError(http.StatusInternalServerError, err.Error())
+		return helper.CustomError(http.StatusInternalServerError, fmt.Sprintf("Find one user fail: %s", err.Error()))
 	}
 
 	return nil

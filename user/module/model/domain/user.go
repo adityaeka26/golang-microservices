@@ -4,7 +4,7 @@ type InsertUser struct {
 	Username     string `bson:"username"`
 	Password     string `bson:"password"`
 	Name         string `bson:"name"`
-	MobileNumber string `bson:"mobilNumber"`
+	MobileNumber string `bson:"mobileNumber"`
 }
 
 type User struct {
@@ -12,7 +12,7 @@ type User struct {
 	Username     string `bson:"username"`
 	Password     string `bson:"password"`
 	Name         string `bson:"name"`
-	MobileNumber string `bson:"mobilNumber"`
+	MobileNumber string `bson:"mobileNumber"`
 }
 
 type UserRedis struct {
@@ -20,11 +20,11 @@ type UserRedis struct {
 	Password     string `json:"password"`
 	Name         string `json:"name"`
 	Otp          string `json:"otp"`
-	MobileNumber string `json:"mobilNumber"`
+	MobileNumber string `json:"mobileNumber"`
 }
 
-type UserKafka struct {
+type RegisterOtpKafka struct {
 	Name         string `json:"name"`
 	Otp          string `json:"otp"`
-	MobileNumber string `json:"mobilNumber"`
+	MobileNumber string `json:"mobileNumber"`
 }
