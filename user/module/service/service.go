@@ -76,7 +76,7 @@ func (service ServiceImpl) Register(ctx context.Context, request web.RegisterReq
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 	if err != nil {
 		fmt.Printf("Generate hashed password fail: %s", err.Error())
-		return helper.CustomError(http.StatusInternalServerError)
+		return helper.CustomError(http.StatusInternalServerError, err.Error())
 	}
 
 	// Generate otp 6 digit
