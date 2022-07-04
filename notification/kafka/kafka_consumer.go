@@ -1,8 +1,6 @@
 package kafka
 
 import (
-	"fmt"
-
 	"github.com/Shopify/sarama"
 )
 
@@ -14,12 +12,11 @@ type KafkaConsumerImpl struct {
 	consumer sarama.Consumer
 }
 
-func NewKafkaConsumer() KafkaConsumer {
-	consumer, err := sarama.NewConsumer([]string{"localhost:9092"}, nil)
+func NewKafkaConsumer(url string) KafkaConsumer {
+	consumer, err := sarama.NewConsumer([]string{url}, nil)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("NewKafkaConsumer")
 
 	return &KafkaConsumerImpl{
 		consumer: consumer,

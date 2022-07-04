@@ -11,8 +11,8 @@ type RedisImpl struct {
 
 func NewRedis(addr string, password string) Redis {
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "leomessi",
+		Addr:     addr,
+		Password: password,
 		DB:       0,
 	})
 

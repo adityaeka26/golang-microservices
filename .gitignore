@@ -1,3 +1,7 @@
-.vscode/*
+.vscode
 */.env
+!volumes/
 volumes/*
+!volumes/filebeat/
+volumes/filebeat/*
+!volumes/filebeat/filebeat.yml

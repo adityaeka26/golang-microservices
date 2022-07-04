@@ -5,6 +5,7 @@ import (
 	"github.com/adityaeka26/golang-microservices/user/database"
 	"github.com/adityaeka26/golang-microservices/user/jwt"
 	"github.com/adityaeka26/golang-microservices/user/kafka"
+	"github.com/adityaeka26/golang-microservices/user/logger"
 	"github.com/adityaeka26/golang-microservices/user/middleware"
 	"github.com/adityaeka26/golang-microservices/user/module/handler"
 	"github.com/adityaeka26/golang-microservices/user/module/repository"
@@ -17,13 +18,14 @@ func main() {
 
 	jwtAuth := jwt.NewJWT(config)
 	authMiddleware := middleware.NewAuth()
+	logger := logger.NewLog(config.GetEnv().AppName, config.GetEnv().AppEnvironment)
 
-	kafkaProducer := kafka.NewKafkaProducer()
+	kafkaProducer := kafka.NewKafkaProducer(config.GetEnv().KafkaUrl)
 	redis := database.NewRedis(config.GetEnv().RedisUrl, config.GetEnv().RedisPassword)
 	mongoDatabase := database.NewMongoDB(config.GetEnv().MongodbUrl, config.GetEnv().MongodbDatabaseName)
 
 	repository := repository.NewRepository(mongoDatabase)
-	service := service.NewService(repository, jwtAuth, redis, kafkaProducer)
+	service := service.NewService(repository, jwtAuth, redis, kafkaProducer, logger)
 	handler := handler.NewHandler(service)
 	router := router.NewRouter(handler, authMiddleware)
 

@@ -10,9 +10,9 @@ import (
 )
 
 func main() {
-	_ = config.NewConfig()
+	config := config.NewConfig()
 
-	kafkaConsumer := kafka.NewKafkaConsumer()
+	kafkaConsumer := kafka.NewKafkaConsumer(config.GetEnv().KafkaUrl)
 
 	repository := repository.NewRepository()
 	service := service.NewService(repository)

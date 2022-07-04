@@ -14,13 +14,13 @@ type KafkaProducerImpl struct {
 	producer sarama.SyncProducer
 }
 
-func NewKafkaProducer() KafkaProducer {
+func NewKafkaProducer(url string) KafkaProducer {
 	kafkaConfig := sarama.NewConfig()
 	kafkaConfig.Producer.Return.Successes = true
 	kafkaConfig.Net.WriteTimeout = 5 * time.Second
 	kafkaConfig.Producer.Retry.Max = 0
 
-	producers, err := sarama.NewSyncProducer([]string{"localhost:9092"}, kafkaConfig)
+	producers, err := sarama.NewSyncProducer([]string{url}, kafkaConfig)
 	if err != nil {
 		panic(err)
 	}

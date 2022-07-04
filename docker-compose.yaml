@@ -6,6 +6,19 @@ services:
   #   build: ./user
   #   ports:
   #     - 8080:8080
+  #   labels:
+  #     co.elastic.logs/enabled: true
+  #     co.elastic.logs/json.keys_under_root: true
+  #     co.elastic.logs/json.overwrite_keys: true
+  #     co.elastic.logs/json.add_error_key: true
+  #     co.elastic.logs/json.expand_keys: true
+  #   environment:
+  #     MONGODB_URL: mongodb://root:leomessi@mongodb:27017/book_db?authSource=admin&ssl=false
+  #     MONGODB_DATABASENAME: book_db
+  #     JWT_KEY: leomessi
+  #     REDIS_URL: redis:6379
+  #     REDIS_PASSWORD: leomessi
+  #     KAFKA_URL: kafka:9092
   # book_service:
   #   container_name: book_service
   #   build: ./book
@@ -16,14 +29,17 @@ services:
   #   build: ./notification
   #   ports:
   #     - 8082:8082
+  #   environment:
+  #     KAFKA_URL: kafka:9092
+
   mongodb:
     container_name: book_mongodb
     image: mongo
     ports:
       - 27017:27017
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=leomessi
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: leomessi
     volumes:
       - ./volumes/mongodb:/data/db
 
@@ -53,7 +69,7 @@ services:
     environment:
       - KAFKA_BROKER_ID=1
       - KAFKA_LISTENERS=PLAINTEXT://:9092
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
     depends_on:

@@ -1,6 +1,10 @@
 package config
 
-import "github.com/joho/godotenv"
+import (
+	"os"
+
+	"github.com/joho/godotenv"
+)
 
 type Config interface {
 	GetEnv() Env
@@ -17,11 +21,15 @@ func NewConfig() Config {
 	}
 
 	return &ConfigImpl{
-		env: Env{},
+		env: Env{
+			KafkaUrl: os.Getenv("KAFKA_URL"),
+		},
 	}
 }
 
-type Env struct{}
+type Env struct {
+	KafkaUrl string
+}
 
 func (config ConfigImpl) GetEnv() Env {
 	return config.env

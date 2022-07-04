@@ -27,16 +27,22 @@ func NewConfig() Config {
 			JwtKey:              os.Getenv("JWT_KEY"),
 			RedisUrl:            os.Getenv("REDIS_URL"),
 			RedisPassword:       os.Getenv("REDIS_PASSWORD"),
+			KafkaUrl:            os.Getenv("KAFKA_URL"),
+			AppName:             os.Getenv("APP_NAME"),
+			AppEnvironment:      os.Getenv("APP_ENVIRONMENT"),
 		},
 	}
 }
 
 type Env struct {
+	AppName             string
+	AppEnvironment      string
 	MongodbUrl          string
 	MongodbDatabaseName string
 	JwtKey              string
 	RedisUrl            string
 	RedisPassword       string
+	KafkaUrl            string
 }
 
 func (config ConfigImpl) GetEnv() Env {
