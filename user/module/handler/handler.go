@@ -9,6 +9,7 @@ import (
 	"github.com/adityaeka26/golang-microservices/user/module/service"
 	"github.com/gin-gonic/gin"
 	"go.elastic.co/apm"
+	"go.elastic.co/apm/module/apmzap/v2"
 )
 
 type Handler interface {
@@ -28,8 +29,11 @@ func NewHandler(service service.Service, logger logger.Logger) Handler {
 }
 
 func (handler HandlerImpl) Register(c *gin.Context) {
-	span, ctx := apm.StartSpan(c.Request.Context(), "PingHandler", "request")
+	span, ctx := apm.StartSpan(c.Request.Context(), "Register", "handler")
 	defer span.End()
+
+	traceContextFields := apmzap.TraceContext(c.Request.Context())
+	handler.logger.GetLogger().With(traceContextFields...).Debug("handling request")
 
 	request := &web.RegisterRequest{}
 

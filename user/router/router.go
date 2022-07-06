@@ -4,6 +4,7 @@ import (
 	"github.com/adityaeka26/golang-microservices/user/middleware"
 	"github.com/adityaeka26/golang-microservices/user/module/handler"
 	"github.com/gin-gonic/gin"
+	"go.elastic.co/apm/module/apmgin"
 )
 
 type Router interface {
@@ -17,7 +18,7 @@ type RouterImpl struct {
 
 func NewRouter(handler handler.Handler, auth middleware.Auth) Router {
 	router := gin.New()
-	// router.Use(apmgin.Middleware(router))
+	router.Use(apmgin.Middleware(router))
 
 	userRouter := router.Group("/user")
 
