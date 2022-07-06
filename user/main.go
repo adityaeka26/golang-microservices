@@ -16,17 +16,19 @@ import (
 func main() {
 	config := config.NewConfig()
 
+	// log.Add
+
 	jwtAuth := jwt.NewJWT(config)
 	authMiddleware := middleware.NewAuth()
 	logger := logger.NewLog(config.GetEnv().AppName, config.GetEnv().AppEnvironment)
 
-	kafkaProducer := kafka.NewKafkaProducer(config.GetEnv().KafkaUrl)
+	kafkaProducer := kafka.NewKafkaProducer(config.GetEnv().KafkaUrl, logger)
 	redis := database.NewRedis(config.GetEnv().RedisUrl, config.GetEnv().RedisPassword)
 	mongoDatabase := database.NewMongoDB(config.GetEnv().MongodbUrl, config.GetEnv().MongodbDatabaseName)
 
 	repository := repository.NewRepository(mongoDatabase)
 	service := service.NewService(repository, jwtAuth, redis, kafkaProducer, logger)
-	handler := handler.NewHandler(service)
+	handler := handler.NewHandler(service, logger)
 	router := router.NewRouter(handler, authMiddleware)
 
 	router.GetGinEngine().Run(":8080")

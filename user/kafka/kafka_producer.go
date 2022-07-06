@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
+	"github.com/adityaeka26/golang-microservices/user/logger"
+	"go.uber.org/zap"
 )
 
 type KafkaProducer interface {
@@ -12,9 +14,10 @@ type KafkaProducer interface {
 
 type KafkaProducerImpl struct {
 	producer sarama.SyncProducer
+	logger   logger.Logger
 }
 
-func NewKafkaProducer(url string) KafkaProducer {
+func NewKafkaProducer(url string, logger logger.Logger) KafkaProducer {
 	kafkaConfig := sarama.NewConfig()
 	kafkaConfig.Producer.Return.Successes = true
 	kafkaConfig.Net.WriteTimeout = 5 * time.Second
@@ -27,10 +30,12 @@ func NewKafkaProducer(url string) KafkaProducer {
 
 	return &KafkaProducerImpl{
 		producer: producers,
+		logger:   logger,
 	}
 }
 
 func (kafkaProducer KafkaProducerImpl) SendMessage(topic string, msg string) error {
+	context := "kafkaProducer-SendMessage"
 	kafkaMsg := &sarama.ProducerMessage{
 		Topic: topic,
 		Value: sarama.StringEncoder(msg),
@@ -40,6 +45,13 @@ func (kafkaProducer KafkaProducerImpl) SendMessage(topic string, msg string) err
 	if err != nil {
 		return err
 	}
+
+	kafkaProducer.logger.GetLogger().Info(
+		"Send message success",
+		zap.String("context", context),
+		zap.String("topic", topic),
+		zap.String("data", msg),
+	)
 
 	return nil
 }

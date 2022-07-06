@@ -46,10 +46,10 @@ func NewService(repository repository.Repository, jwtAuth jwt.JWT, redis databas
 }
 
 func (service ServiceImpl) Register(ctx context.Context, request web.RegisterRequest) error {
-	namespace := "service-Register"
+	context := "service-Register"
 	marshaledRequest, err := json.Marshal(request)
 	if err != nil {
-		service.logger.GetLogger().Error("Marshal request fail", zap.Error(err), zap.Namespace(namespace))
+		service.logger.GetLogger().Error("Marshal request fail", zap.Error(err), zap.String("context", context))
 		return helper.CustomError(http.StatusInternalServerError, "Internal server error")
 	}
 
@@ -57,7 +57,7 @@ func (service ServiceImpl) Register(ctx context.Context, request web.RegisterReq
 	request.Username = strings.ToLower(request.Username)
 	mobileNumberRegex := regexp.MustCompile(`^(\+628|628|08|8)`)
 	if !mobileNumberRegex.MatchString(request.MobileNumber) {
-		service.logger.GetLogger().Warn("Wrong format mobile number", zap.Namespace(namespace), zap.ByteString("request", marshaledRequest))
+		service.logger.GetLogger().Warn("Wrong format mobile number", zap.String("context", context), zap.ByteString("request", marshaledRequest))
 		return helper.CustomError(http.StatusBadRequest, "Wrong format mobile number")
 	}
 	request.MobileNumber = mobileNumberRegex.ReplaceAllString(request.MobileNumber, "+628")
@@ -67,11 +67,11 @@ func (service ServiceImpl) Register(ctx context.Context, request web.RegisterReq
 		"username": request.Username,
 	})
 	if err != nil {
-		service.logger.GetLogger().Error("Find one user fail", zap.Error(err), zap.Namespace(namespace), zap.ByteString("request", marshaledRequest))
+		service.logger.GetLogger().Error("Find one user fail", zap.Error(err), zap.String("context", context), zap.ByteString("request", marshaledRequest))
 		return helper.CustomError(http.StatusInternalServerError, "Internal server error")
 	}
 	if user != nil {
-		service.logger.GetLogger().Warn("Username already registered", zap.Namespace(namespace), zap.ByteString("request", marshaledRequest))
+		service.logger.GetLogger().Warn("Username already registered", zap.String("context", context), zap.ByteString("request", marshaledRequest))
 		return helper.CustomError(http.StatusUnprocessableEntity, "Username already registered")
 	}
 
@@ -80,25 +80,25 @@ func (service ServiceImpl) Register(ctx context.Context, request web.RegisterReq
 		"mobileNumber": request.MobileNumber,
 	})
 	if err != nil {
-		service.logger.GetLogger().Error("Find one user 2 fail", zap.Error(err), zap.Namespace(namespace), zap.ByteString("request", marshaledRequest))
+		service.logger.GetLogger().Error("Find one user 2 fail", zap.Error(err), zap.String("context", context), zap.ByteString("request", marshaledRequest))
 		return helper.CustomError(http.StatusInternalServerError, "Internal server error")
 	}
 	if user != nil {
-		service.logger.GetLogger().Warn("Mobile number already registered", zap.Namespace(namespace), zap.ByteString("request", marshaledRequest))
+		service.logger.GetLogger().Warn("Mobile number already registered", zap.String("context", context), zap.ByteString("request", marshaledRequest))
 		return helper.CustomError(http.StatusUnprocessableEntity, "Mobile number already registered")
 	}
 
 	// Generate hashed password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 	if err != nil {
-		service.logger.GetLogger().Error("Generate hashed password fail", zap.Error(err), zap.Namespace(namespace), zap.ByteString("request", marshaledRequest))
+		service.logger.GetLogger().Error("Generate hashed password fail", zap.Error(err), zap.String("context", context), zap.ByteString("request", marshaledRequest))
 		return helper.CustomError(http.StatusInternalServerError, "Internal server error")
 	}
 
 	// Generate otp 6 digit
 	otp, err := helper.GenerateOTP(6)
 	if err != nil {
-		service.logger.GetLogger().Error("Generate otp fail", zap.Error(err), zap.Namespace(namespace), zap.ByteString("request", marshaledRequest))
+		service.logger.GetLogger().Error("Generate otp fail", zap.Error(err), zap.String("context", context), zap.ByteString("request", marshaledRequest))
 		return helper.CustomError(http.StatusInternalServerError, "Internal server error")
 	}
 
@@ -112,7 +112,7 @@ func (service ServiceImpl) Register(ctx context.Context, request web.RegisterReq
 	}
 	userRedisJson, err := json.Marshal(userRedis)
 	if err != nil {
-		service.logger.GetLogger().Error("Marshal redis fail", zap.Error(err), zap.Namespace(namespace), zap.ByteString("request", marshaledRequest))
+		service.logger.GetLogger().Error("Marshal redis fail", zap.Error(err), zap.String("context", context), zap.ByteString("request", marshaledRequest))
 		return helper.CustomError(http.StatusInternalServerError, "Internal server error")
 	}
 
@@ -123,7 +123,7 @@ func (service ServiceImpl) Register(ctx context.Context, request web.RegisterReq
 		string(userRedisJson),
 		time.Minute*10,
 	).Err(); err != nil {
-		service.logger.GetLogger().Error("Set redis fail", zap.Error(err), zap.Namespace(namespace), zap.ByteString("request", marshaledRequest))
+		service.logger.GetLogger().Error("Set redis fail", zap.Error(err), zap.String("context", context), zap.ByteString("request", marshaledRequest))
 		return helper.CustomError(http.StatusInternalServerError, "Internal server error")
 	}
 
@@ -135,20 +135,20 @@ func (service ServiceImpl) Register(ctx context.Context, request web.RegisterReq
 	}
 	userKafkaJson, err := json.Marshal(userKafka)
 	if err != nil {
-		service.logger.GetLogger().Error("Marshal kafka fail", zap.Error(err), zap.Namespace(namespace), zap.ByteString("request", marshaledRequest))
+		service.logger.GetLogger().Error("Marshal kafka fail", zap.Error(err), zap.String("context", context), zap.ByteString("request", marshaledRequest))
 		return helper.CustomError(http.StatusInternalServerError, "Internal server error")
 	}
 
 	// Produce user json to kafka
 	err = service.kafkaProducer.SendMessage("REGISTER-OTP", string(userKafkaJson))
 	if err != nil {
-		service.logger.GetLogger().Error("Send message kafka fail", zap.Error(err), zap.Namespace(namespace), zap.ByteString("request", marshaledRequest))
+		service.logger.GetLogger().Error("Send message kafka fail", zap.Error(err), zap.String("context", context), zap.ByteString("request", marshaledRequest))
 		return helper.CustomError(http.StatusInternalServerError, "Internal server error")
 	}
 
 	service.logger.GetLogger().Info(
 		"Register success",
-		zap.Namespace(namespace),
+		zap.String("context", context),
 		zap.ByteString("request", marshaledRequest),
 	)
 
@@ -156,12 +156,13 @@ func (service ServiceImpl) Register(ctx context.Context, request web.RegisterReq
 }
 
 func (service ServiceImpl) VerifyRegister(ctx context.Context, request web.VerifyRegisterRequest) (*web.VerifyRegisterResponse, error) {
-	namespace := "service-VerifyRegister"
+	context := "service-VerifyRegister"
+
 	marshaledRequest, err := json.Marshal(request)
 	if err != nil {
 		service.logger.GetLogger().Error(
 			"Marshal request fail",
-			zap.Namespace(namespace),
+			zap.String("context", context),
 			zap.Error(err),
 		)
 		return nil, helper.CustomError(http.StatusInternalServerError, "Internal server error")
@@ -176,7 +177,7 @@ func (service ServiceImpl) VerifyRegister(ctx context.Context, request web.Verif
 	if err != nil {
 		service.logger.GetLogger().Error(
 			"Find one user fail",
-			zap.Namespace(namespace),
+			zap.String("context", context),
 			zap.Error(err),
 			zap.ByteString("request", marshaledRequest),
 		)
@@ -185,7 +186,7 @@ func (service ServiceImpl) VerifyRegister(ctx context.Context, request web.Verif
 	if user != nil {
 		service.logger.GetLogger().Warn(
 			"Username already registered",
-			zap.Namespace(namespace),
+			zap.String("context", context),
 			zap.ByteString("request", marshaledRequest),
 		)
 		return nil, helper.CustomError(http.StatusUnprocessableEntity, "Username already registered")
@@ -197,14 +198,14 @@ func (service ServiceImpl) VerifyRegister(ctx context.Context, request web.Verif
 		if err == redis.Nil {
 			service.logger.GetLogger().Warn(
 				"OTP has expired",
-				zap.Namespace(namespace),
+				zap.String("context", context),
 				zap.ByteString("request", marshaledRequest),
 			)
 			return nil, helper.CustomError(http.StatusUnauthorized, "OTP has expired")
 		}
 		service.logger.GetLogger().Error(
 			"Get redis fail",
-			zap.Namespace(namespace),
+			zap.String("context", context),
 			zap.Error(err),
 			zap.ByteString("request", marshaledRequest),
 		)
@@ -217,7 +218,7 @@ func (service ServiceImpl) VerifyRegister(ctx context.Context, request web.Verif
 	if err != nil {
 		service.logger.GetLogger().Error(
 			"Unmarshal redis fail",
-			zap.Namespace(namespace),
+			zap.String("context", context),
 			zap.Error(err),
 			zap.ByteString("request", marshaledRequest),
 		)
@@ -228,7 +229,7 @@ func (service ServiceImpl) VerifyRegister(ctx context.Context, request web.Verif
 	if userRedis.Otp != request.Otp {
 		service.logger.GetLogger().Warn(
 			"Invalid OTP",
-			zap.Namespace(namespace),
+			zap.String("context", context),
 			zap.ByteString("request", marshaledRequest),
 		)
 		return nil, helper.CustomError(http.StatusUnauthorized, "Invalid OTP")
@@ -245,7 +246,7 @@ func (service ServiceImpl) VerifyRegister(ctx context.Context, request web.Verif
 	if err != nil {
 		service.logger.GetLogger().Error(
 			"Insert one user fail",
-			zap.Namespace(namespace),
+			zap.String("context", context),
 			zap.Error(err),
 			zap.ByteString("request", marshaledRequest),
 		)
@@ -257,7 +258,7 @@ func (service ServiceImpl) VerifyRegister(ctx context.Context, request web.Verif
 	if err != nil {
 		service.logger.GetLogger().Error(
 			"Delete redis fail",
-			zap.Namespace(namespace),
+			zap.String("context", context),
 			zap.Error(err),
 			zap.ByteString("request", marshaledRequest),
 		)
@@ -271,7 +272,7 @@ func (service ServiceImpl) VerifyRegister(ctx context.Context, request web.Verif
 	if err != nil {
 		service.logger.GetLogger().Error(
 			"Generate token fail",
-			zap.Namespace(namespace),
+			zap.String("context", context),
 			zap.Error(err),
 			zap.ByteString("request", marshaledRequest),
 		)
@@ -285,7 +286,7 @@ func (service ServiceImpl) VerifyRegister(ctx context.Context, request web.Verif
 	if err != nil {
 		service.logger.GetLogger().Error(
 			"Marshal response fail",
-			zap.Namespace(namespace),
+			zap.String("context", context),
 			zap.Error(err),
 			zap.ByteString("request", marshaledRequest),
 		)
@@ -293,7 +294,7 @@ func (service ServiceImpl) VerifyRegister(ctx context.Context, request web.Verif
 	}
 	service.logger.GetLogger().Info(
 		"Verify register success",
-		zap.Namespace(namespace),
+		zap.String("context", context),
 		zap.ByteString("request", marshaledRequest),
 		zap.ByteString("response", marshaledResponse),
 	)

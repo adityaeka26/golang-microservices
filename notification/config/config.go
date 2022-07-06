@@ -22,13 +22,17 @@ func NewConfig() Config {
 
 	return &ConfigImpl{
 		env: Env{
-			KafkaUrl: os.Getenv("KAFKA_URL"),
+			KafkaUrl:       os.Getenv("KAFKA_URL"),
+			AppName:        os.Getenv("APP_NAME"),
+			AppEnvironment: os.Getenv("APP_ENVIRONMENT"),
 		},
 	}
 }
 
 type Env struct {
-	KafkaUrl string
+	KafkaUrl       string
+	AppName        string
+	AppEnvironment string
 }
 
 func (config ConfigImpl) GetEnv() Env {

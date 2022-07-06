@@ -4,9 +4,11 @@ import (
 	"net/http"
 
 	"github.com/adityaeka26/golang-microservices/user/helper"
+	"github.com/adityaeka26/golang-microservices/user/logger"
 	"github.com/adityaeka26/golang-microservices/user/module/model/web"
 	"github.com/adityaeka26/golang-microservices/user/module/service"
 	"github.com/gin-gonic/gin"
+	"go.elastic.co/apm"
 )
 
 type Handler interface {
@@ -15,15 +17,20 @@ type Handler interface {
 }
 type HandlerImpl struct {
 	service service.Service
+	logger  logger.Logger
 }
 
-func NewHandler(service service.Service) Handler {
+func NewHandler(service service.Service, logger logger.Logger) Handler {
 	return &HandlerImpl{
 		service: service,
+		logger:  logger,
 	}
 }
 
 func (handler HandlerImpl) Register(c *gin.Context) {
+	span, ctx := apm.StartSpan(c.Request.Context(), "PingHandler", "request")
+	defer span.End()
+
 	request := &web.RegisterRequest{}
 
 	if err := c.ShouldBind(request); err != nil {
@@ -35,7 +42,7 @@ func (handler HandlerImpl) Register(c *gin.Context) {
 		return
 	}
 
-	err := handler.service.Register(c.Request.Context(), *request)
+	err := handler.service.Register(ctx, *request)
 	if err != nil {
 		helper.RespError(c, err)
 		return

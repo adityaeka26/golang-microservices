@@ -17,6 +17,7 @@ type RouterImpl struct {
 
 func NewRouter(handler handler.Handler, auth middleware.Auth) Router {
 	router := gin.New()
+	// router.Use(apmgin.Middleware(router))
 
 	userRouter := router.Group("/user")
 

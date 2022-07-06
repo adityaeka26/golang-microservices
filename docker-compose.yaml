@@ -45,7 +45,7 @@ services:
 
   zookeeper:
     container_name: book_zookeeper
-    image: bitnami/zookeeper:3.6.2
+    image: bitnami/zookeeper:3.8
     ports:
       - 2181:2181
     environment:
@@ -63,7 +63,7 @@ services:
 
   kafka:
     container_name: book_kafka
-    image: bitnami/kafka:2.6.0
+    image: bitnami/kafka:3.2
     ports:
       - 9092:9092
     environment:
@@ -77,25 +77,19 @@ services:
     volumes: 
       - ./volumes/kafka:/var/lib/kafka/data
 
-  filebeat:
-    container_name: book_filebeat
-    labels:
-      co.elastic.logs/enabled: false
-    user: root
-    image: docker.elastic.co/beats/filebeat:7.14.0
-    command: filebeat -e -strict.perms=false
-    volumes:
-      - ./volumes/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-
   elasticsearch:
     container_name: book_elasticsearch
     labels:
       co.elastic.logs/enabled: false
-    environment: 
+    environment:
       - discovery.type=single-node
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+      # - xpack.security.enabled=true
+      # - ELASTIC_USERNAME=user
+      # - ELASTIC_PASSWORD=leomessi
+      # - http.cors.enabled=true
+      # - http.cors.allow-origin="*"
+      # - ES_JAVA_OPTS=-Xmx256m -Xms256m
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
     healthcheck:
       test: ["CMD", "curl", "-s", "-f", "http://localhost:9200/_cat/health"]
       interval: 3s
@@ -106,14 +100,48 @@ services:
     ports:
       - 9200:9200
 
+  apm_server:
+    container_name: book_apm_server
+    image: docker.elastic.co/apm/apm-server:7.15.0
+    volumes:
+      - ./volumes/apm-server/apm-server.yml:/usr/share/apm-server/apm-server.yml:ro
+    depends_on:
+      - elasticsearch
+      - kibana
+    cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
+    cap_drop: ["ALL"]
+    ports:
+      - 8200:8200
+    command: >
+      apm-server -e
+        -E apm-server.rum.enabled=true
+        -E setup.kibana.host=kibana:5601
+        -E setup.template.settings.index.number_of_replicas=0
+        -E apm-server.kibana.enabled=true
+        -E apm-server.kibana.host=kibana:5601
+        -E output.elasticsearch.hosts=["elasticsearch:9200"]
+
+  filebeat:
+    container_name: book_filebeat
+    labels:
+      co.elastic.logs/enabled: false
+    user: root
+    image: docker.elastic.co/beats/filebeat:7.15.0
+    command: filebeat -e -strict.perms=false
+    volumes:
+      - ./volumes/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./volumes/filebeat/log.json:/usr/share/filebeat/log.json
+
   kibana:
     container_name: book_kibana
     labels:
       co.elastic.logs/enabled: false
-    image: docker.elastic.co/kibana/kibana:7.14.0
+    image: docker.elastic.co/kibana/kibana:7.15.0
     depends_on:
-      elasticsearch:
-        condition: service_healthy
+      - elasticsearch
+        # condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-s", "-f", "http://localhost:5601/api/status"]
       interval: 3s
@@ -121,3 +149,5 @@ services:
       retries: 80
     ports:
       - 5601:5601
+    # volumes:
+    #   - ./volumes/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
